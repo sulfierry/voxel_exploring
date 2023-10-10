@@ -11,16 +11,18 @@ def extract_unique_molecules(file_main: str, file_compare: str) -> pd.DataFrame:
     Returns:
     - DataFrame: DataFrame contendo molregno e canonical_smiles das moléculas únicas.
     """
-    df_main = pd.read_csv(file_main, sep="\t")
-    df_compare = pd.read_csv(file_compare, sep="\t")
+    # Carregando os molregnos de ambos os arquivos
+    molregno_main = set(pd.read_csv(file_main, sep="\t")['molregno'])
+    molregno_compare = set(pd.read_csv(file_compare, sep="\t")['molregno'])
 
     # Encontra os molregnos que estão apenas no arquivo principal
-    unique_molregnos = set(df_main['molregno']) - set(df_compare['molregno'])
+    missing_molregnos = molregno_main - molregno_compare
 
-    # Filtra o DataFrame principal para obter apenas as linhas com molregnos únicos
-    unique_molecules = df_main[df_main['molregno'].isin(unique_molregnos)]
+    # Filtra o DataFrame principal para obter apenas as linhas com molregnos faltantes
+    missing_molecules_df = pd.read_csv(file_main, sep="\t")
+    missing_molecules = missing_molecules_df[missing_molecules_df['molregno'].isin(missing_molregnos)]
 
-    return unique_molecules[['molregno', 'canonical_smiles']]
+    return missing_molecules[['molregno', 'canonical_smiles']]
 
 if __name__ == "__main__":
     # Define os caminhos dos arquivos
